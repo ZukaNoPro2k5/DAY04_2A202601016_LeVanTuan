@@ -1,0 +1,801 @@
+{
+  "run_id": "v3_B_group_openrouter_20260729T141510985831",
+  "version": "v3",
+  "artifact_version": "v3+p35f4c6a848d2+t854ecb185ffe",
+  "prompt_hash": "35f4c6a848d2fd2c21050b1045f7f22e55951768e233d4373ff9a4c8b893c439",
+  "tools_hash": "854ecb185ffe1e63d1366937aa9fb3961fefb4362d04640dd8f943870b899308",
+  "phase": "B",
+  "suite": "group",
+  "provider": "openrouter",
+  "model": "openai/gpt-4o-mini",
+  "system_prompt": "/home/zukanopro/workspace/Lab/Day4/starter_v0/artifacts/system_prompt.md",
+  "tools": "/home/zukanopro/workspace/Lab/Day4/starter_v0/artifacts/tools.yaml",
+  "eval_cases": "data/eval_group.json",
+  "dataset_id": "day04_v2_research_group",
+  "dataset_role": "group",
+  "description": "Bộ eval do Lê Văn Tuấn (2A202601016) thiết kế: đúng 5 single-turn và 5 multi-turn, bao phủ routing, arguments, boundary, missing information, unnecessary tool, out-of-scope và tool deduplicate mới.",
+  "generated_at": "2026-07-29T14:15:10",
+  "summary": {
+    "total_cases": 10,
+    "measured_cases": 10,
+    "provider_error_cases": 0,
+    "passed_cases": 10,
+    "case_accuracy": 1.0,
+    "tool_routing_accuracy": 1.0,
+    "argument_accuracy": 1.0,
+    "multiturn_accuracy": 1.0,
+    "failure_counts": {},
+    "observed_mismatch_counts": {}
+  },
+  "results": [
+    {
+      "id": "G01_single_deduplicate_urls",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Yêu cầu làm sạch danh sách nguồn đã có phải dùng tool deduplicate mới; không tìm web hoặc chỉ format."
+      },
+      "input": "Loại bỏ các nguồn trùng trong danh sách này: 1) AI Update — https://example.com/ai?utm_source=newsletter; 2) AI Update copy — https://example.com/ai/; 3) Robotics — https://example.org/robotics.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "deduplicate",
+            "args": {}
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "deduplicate",
+            "args": {
+              "items": [
+                {
+                  "title": "AI Update",
+                  "url": "https://example.com/ai?utm_source=newsletter"
+                },
+                {
+                  "title": "AI Update copy",
+                  "url": "https://example.com/ai/"
+                },
+                {
+                  "title": "Robotics",
+                  "url": "https://example.org/robotics"
+                }
+              ]
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "deduplicate",
+          "args": {
+            "items": [
+              {
+                "title": "AI Update",
+                "url": "https://example.com/ai?utm_source=newsletter"
+              },
+              {
+                "title": "AI Update copy",
+                "url": "https://example.com/ai/"
+              },
+              {
+                "title": "Robotics",
+                "url": "https://example.org/robotics"
+              }
+            ]
+          },
+          "result": {
+            "tool": "deduplicate",
+            "input_count": 3,
+            "removed_count": 1,
+            "items": [
+              {
+                "title": "AI Update",
+                "url": "https://example.com/ai?utm_source=newsletter"
+              },
+              {
+                "title": "Robotics",
+                "url": "https://example.org/robotics"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G02_single_timeline_handle_limit",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Trích handle không có ký tự @ và giữ chính xác limit=4 khi lấy timeline của một tài khoản."
+      },
+      "input": "Chỉ lấy 4 bài đăng mới nhất từ tài khoản @ylecun.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "ylecun",
+              "limit": 4
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "ylecun",
+              "limit": 4
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "timeline",
+          "args": {
+            "screenname": "ylecun",
+            "limit": 4
+          },
+          "result": {
+            "tool": "get_user_tweets",
+            "screenname": "ylecun",
+            "items": [
+              {
+                "title": "RT @finkd: Give it a read: https://t.co/Rq4O3xRHdL",
+                "summary": "RT @finkd: Give it a read: https://t.co/Rq4O3xRHdL",
+                "url": "https://x.com/ylecun/status/2082188279588544923",
+                "source": "@ylecun",
+                "date": "Tue Jul 28 19:35:45 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 504,
+                  "views": "3901"
+                }
+              },
+              {
+                "title": "RT @finkd: I wrote about why we believe the future is for everyone. More coming about a positive vision for a world with",
+                "summary": "RT @finkd: I wrote about why we believe the future is for everyone. More coming about a positive vision for a world with superintelligence…",
+                "url": "https://x.com/ylecun/status/2082188225255211172",
+                "source": "@ylecun",
+                "date": "Tue Jul 28 19:35:32 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 1806,
+                  "views": "3451"
+                }
+              },
+              {
+                "title": "RT @Dan_Jeffries1: Go ahead and ask yourself, really ask yourself, if all these confident predictors are wrong about job",
+                "summary": "RT @Dan_Jeffries1: Go ahead and ask yourself, really ask yourself, if all these confident predictors are wrong about jobs and not training…",
+                "url": "https://x.com/ylecun/status/2082072377723371552",
+                "source": "@ylecun",
+                "date": "Tue Jul 28 11:55:12 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 42,
+                  "views": "4896"
+                }
+              },
+              {
+                "title": "RT @Dan_Jeffries1: Catalog of incorrect AI predictions.",
+                "summary": "RT @Dan_Jeffries1: Catalog of incorrect AI predictions.\n\nDoomers from the rationalist cosplay community are left out, presumably because th…",
+                "url": "https://x.com/ylecun/status/2081847285932269717",
+                "source": "@ylecun",
+                "date": "Mon Jul 27 21:00:46 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 45,
+                  "views": "4588"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G03_single_monthly_news_args",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Ánh xạ tin tức sang topic=news, tháng này sang timeframe=month và không tự viết lại query."
+      },
+      "input": "Tìm tin tức về pin thể rắn trong tháng này. Dùng chính xác query \"pin thể rắn\".",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "pin thể rắn",
+              "topic": "news",
+              "timeframe": "month"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "pin thể rắn",
+              "topic": "news",
+              "timeframe": "month"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "pin thể rắn",
+            "topic": "news",
+            "timeframe": "month"
+          },
+          "result": {
+            "tool": "web_search",
+            "query": "pin thể rắn",
+            "topic": "news",
+            "timeframe": "month",
+            "items": [
+              {
+                "title": "Công nghệ pin mới sắp khiến pin silicon-carbon lỗi thời",
+                "url": "https://thanhnien.vn/cong-nghe-pin-moi-sap-khien-pin-silicon-carbon-loi-thoi-185260707113035594.htm",
+                "source": "thanhnien.vn",
+                "summary": "Khác với silicon-carbon, pin thể rắn viết lại quy tắc trò chơi bằng cách loại bỏ hoàn toàn chất điện phn dạng lỏng dễ cháy và thay thế bằng chất nền thể rắn. Sự thay đổi cốt lõi này giúp viên pin trở nên an toàn hơn rõ rệt trước các va đập hoặc nhiệt độ cao, đồng thời giải phóng không gian đóng gói để tạo ra các cell pin 'đậm đặc' hơn. Samsung Electro-Mechanics đã phát triển thành công pin thể rắn siêu nhỏ gọn và vạch ra lộ trình ứng dụng, bắt đầu từ nhẫn thông minh Galaxy Ring, tiếp theo là [...] Nhìn chung, trong khi pin silicon-carbon chỉ cải tiến dựa trên những quy tắc sẵn có thì pin thể rắn đang thực sự viết lại cuộc chơi. Thành quả của công nghệ này sẽ sớm xuất hiện trên cổ tay của người dùng trước khi tiến vào túi quần. Người dùng hoàn toàn có quyền kỳ vọng vào một tương lai không còn bị ràng buộc bởi những chiếc dy cáp sạc phiền toái mỗi ngày.\n\n## Tin liên quan\n\nTrung Quốc phát triển công nghệ pin giúp xe điện giảm nỗi lo cháy nổ [...] Thiết bị đeo thông minh là điểm khởi đầu hoàn hảo cho công nghệ này bởi không gian linh kiện của chúng giới hạn và nhạy cảm với độ dày. Dù công nghệ này hứa hẹn, việc sản xuất hàng loạt với giá thành rẻ vẫn là một bài toán hóc búa do chất điện phn thể rắn rất khó xử lý tại các ranh giới tiếp xúc. Theo tờ JoongAng Daily, Samsung SDI đang đặt mục tiêu thương mại hóa pin thể rắn vào năm 2027 cho cả xe điện lẫn thiết bị di động, hứa hẹn đem lại những thiết bị có thể hoạt động bền bỉ nhiều ngày liên",
+                "score": 0.83742094
+              },
+              {
+                "title": "Công nghệ pin thể rắn sẽ biến đổi ngành xe điện hoàn toàn vào năm 2027",
+                "url": "https://cafebiz.vn/cho-doi-den-nam-2027-cong-nghe-pin-se-lam-dao-lon-hoan-toan-nganh-cong-nghiep-xe-dien-176260720085503896.chn",
+                "source": "cafebiz.vn",
+                "summary": "Tuy nhiên, cuộc đua công nghệ pin vẫn chưa ngã ngũ. Giới công nghiệp cho rằng pin thể rắn (solid - state battery) có thể tạo ra một bước ngoặt quan trọng, mở ra chu kỳ cạnh tranh mới và mang đến cơ hội cho nhiều doanh nghiệp tham gia thị trường bên cạnh các nhà sản xuất đã có vị thế. [...] Phần lớn pin hiện nay sử dụng chất điện phn lỏng để vận chuyển ion giữa cực dương và cực m. Dù đã được thương mại hóa rộng rãi, loại chất điện phn này vẫn tồn tại nhiều hạn chế như nguy cơ rò rỉ, bay hơi hoặc bốc cháy.\n\nVì vậy, trong nhiều thập kỷ, các nhà khoa học đã tìm cách thay thế bằng chất điện phn rắn. Nếu thành công, pin thể rắn được kỳ vọng sẽ an toàn hơn, có mật độ năng lượng cao hơn và hoạt động hiệu quả hơn trong điều kiện nhiệt độ thấp. [...] Tuy nhiên, dù các nguyên mẫu đã xuất hiện trong phòng thí nghiệm, việc thương mại hóa vẫn là bài toán khó do chi phí cao và quy trình sản xuất hàng loạt còn nhiều trở ngại.\n\nMột trong những doanh nghiệp theo đuổi mục tiêu này là ProLogium, nhà phát triển pin thể rắn có trụ sở tại Đài Loan (Trung Quốc). Công ty do Vincent Yang sáng lập và điều hành tuyên bố có thể bắt đầu sản xuất hàng loạt pin thể rắn sớm nhất vào năm 2027.",
+                "score": 0.83452857
+              },
+              {
+                "title": "Chiến lược pin thế hệ mới: Trung Quốc xoay trục sang công nghệ natri-ion và thể rắn",
+                "url": "https://baohatinh.vn/tv/chien-luoc-pin-the-he-moi-trung-quoc-xoay-truc-sang-cong-nghe-natri-ion-va-the-ran-47215.html",
+                "source": "baohatinh.vn",
+                "summary": "Trong khi pin natri-ion giải quyết bài toán chi phí, pin thể rắn lại là chìa khóa cho hiệu suất và an toàn. Bằng cách thay thế chất điện phn lỏng dễ cháy bằng vật liệu rắn, loại pin này hứa hẹn mật độ năng lượng cao hơn và thời gian sạc nhanh hơn đáng kể. Trung Quốc vừa qua cũng đã thiết lập tiêu chuẩn pin thể rắn toàn cầu đầu tiên, một bước đi chiến lược để định hình luật chơi cho toàn ngành.",
+                "score": 0.826278
+              },
+              {
+                "title": "Điện thoại Galaxy tương lai có thể được nâng cấp pin đáng mơ ước",
+                "url": "https://www.24h.com.vn/thoi-trang-hi-tech/dien-thoai-galaxy-tuong-lai-co-the-duoc-nang-cap-pin-dang-mo-uoc-c407a1775165.html",
+                "source": "24h.com.vn",
+                "summary": "Pin thể rắn được coi là loại pin “trong mơ” nhờ vào nhiều ưu điểm vượt trội. Đặc biệt, mật độ năng lượng cao hơn cho phép sử dụng kim loại lithium trong cực dương, giúp thiết kế pin mỏng hơn và tích trữ nhiều năng lượng hơn. Ngoài ra, pin thể rắn còn có khả năng sạc nhanh hơn và an toàn hơn so với pin lithium-ion truyền thống, từ đó giảm thiểu nguy cơ cháy nổ. [...] Samsung SDI, bộ phận chuyên sản xuất pin cho điện thoại Galaxy, vừa công bố kế hoạch sản xuất hàng loạt pin thể rắn vào cuối năm 2027, như báo cáo từ tờ JoongAng Daily của Hàn Quốc. Các đối tượng dự kiến sử dụng loại pin “trong mơ” này bao gồm xe điện, robot và thiết bị di động, hứa hẹn mang đến thời lượng pin sử dụng lên đến nhiều ngày cho các sản phẩm Galaxy trong tương lai.\n\nPin thể rắn có nhiều ưu điểm, nhưng giá thành không phải là một trong số đó. [...] Samsung SDI đã xy dựng dy chuyền sản xuất thử nghiệm pin thể rắn tại trung tm nghiên cứu và phát triển ở Suwon vào tháng 3/2023. Năm 2024, Samsung Electro-Mechanics cũng đã phát triển thành công pin thể rắn nhỏ gọn đầu tiên dành cho thiết bị đeo, với kế hoạch triển khai dự kiến vào cuối năm 2026.\n\nSamsung và BMW đã hợp tác để trang bị pin thể rắn cho một chiếc xe điện của BMW vào tháng 10/2025.",
+                "score": 0.8215175
+              },
+              {
+                "title": "Trung Quốc dồn lực vào pin natri-ion và pin thể rắn để duy trì vị thế dẫn...",
+                "url": "https://baolamdong.vn/trung-quoc-don-luc-vao-pin-natri-ion-va-pin-the-ran-de-duy-tri-vi-the-dan-dau-xe-dien-454493.html",
+                "source": "baolamdong.vn",
+                "summary": "Trong khi pin natri-ion tập trung vào phân khúc giá rẻ, pin thể rắn lại là mục tiêu dài hạn cho các dòng xe điện cao cấp với mật độ năng lượng vượt trội. Mặc dù CATL cho biết việc sản xuất hàng loạt pin thể rắn vẫn còn cần vài năm nữa, nhưng chính sách miễn thuế sẽ đóng vai trò như một khoản hỗ trợ tài chính ban đầu để xây dựng cơ sở hạ tầng sản xuất.",
+                "score": 0.776708
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G04_single_missing_article_url",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Không có URL cụ thể thì phải hỏi người dùng bằng clarify text; không được tự bịa URL."
+      },
+      "input": "Đọc và tóm tắt bài báo mình vừa nhắc đến.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "question": "Bạn có thể cung cấp URL của bài báo mà bạn muốn tóm tắt không?",
+              "response_type": "text"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Bạn có thể cung cấp URL của bài báo mà bạn muốn tóm tắt không?",
+            "response_type": "text"
+          },
+          "result": {
+            "tool": "ask_user",
+            "question": "Bạn có thể cung cấp URL của bài báo mà bạn muốn tóm tắt không?",
+            "response_type": "text",
+            "options": [],
+            "awaiting_user": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "G05_single_out_of_scope_poem",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Yêu cầu sáng tác thơ nằm ngoài phạm vi research agent nên không được gọi bất kỳ tool nào."
+      },
+      "input": "Viết cho mình một bài thơ lục bát về mùa hè.",
+      "expect": {
+        "no_tool": true
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [],
+        "actual_text": "Mùa hè đến, nắng vàng rực rỡ,  \nCánh diều bay, gió thổi mát mẻ.  \nBên dòng sông, nước chảy trong veo,  \nTiếng cười vang, trẻ nhỏ nô đùa.\n\nHoa phượng nở, đỏ rực sân trường,  \nNhững buổi chiều, cùng nhau tắm mưa.  \nHè về đây, kỷ niệm ngập tràn,  \nThời gian trôi, nhưng lòng vẫn nhớ.",
+        "case_failure_type": "out_of_scope",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G06_multi_deduplicate_context",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Carry danh sách nguồn qua nhiều turn rồi dùng deduplicate ở turn cuối thay vì lookup hoặc format."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tôi có ba nguồn: A là https://news.example.com/report?utm_campaign=ai, B là https://news.example.com/report/, C là https://research.example.org/paper."
+        },
+        {
+          "role": "user",
+          "content": "Nguồn A và B có vẻ là cùng một bài."
+        },
+        {
+          "role": "user",
+          "content": "Hãy loại bỏ mục trùng và giữ thứ tự xuất hiện ban đầu."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "deduplicate",
+            "args": {}
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "deduplicate",
+            "args": {
+              "items": [
+                {
+                  "url": "https://news.example.com/report?utm_campaign=ai"
+                },
+                {
+                  "url": "https://news.example.com/report/"
+                },
+                {
+                  "url": "https://research.example.org/paper"
+                }
+              ]
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "deduplicate",
+          "args": {
+            "items": [
+              {
+                "url": "https://news.example.com/report?utm_campaign=ai"
+              },
+              {
+                "url": "https://news.example.com/report/"
+              },
+              {
+                "url": "https://research.example.org/paper"
+              }
+            ]
+          },
+          "result": {
+            "tool": "deduplicate",
+            "input_count": 3,
+            "removed_count": 1,
+            "items": [
+              {
+                "url": "https://news.example.com/report?utm_campaign=ai"
+              },
+              {
+                "url": "https://research.example.org/paper"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G07_multi_social_latest_correction",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Turn cuối phải giữ query, áp dụng correction Top sang Latest và giới hạn đúng 3 bài."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tìm các bài đăng phổ biến về AI agents trên X."
+        },
+        {
+          "role": "user",
+          "content": "Đổi lại: ưu tiên bài mới nhất, không lấy Top."
+        },
+        {
+          "role": "user",
+          "content": "Giới hạn đúng 3 bài về AI agents."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "query": "AI agents",
+              "search_type": "Latest",
+              "limit": 3
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "query": "AI agents",
+              "search_type": "Latest",
+              "limit": 3
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "social_search",
+          "args": {
+            "query": "AI agents",
+            "search_type": "Latest",
+            "limit": 3
+          },
+          "result": {
+            "tool": "search_tweets",
+            "query": "AI agents",
+            "search_type": "Latest",
+            "items": [
+              {
+                "title": "Incidents don't wait for the Tuesday walkthrough. So I built Nightward — AI agents on every job site camera, every shift",
+                "summary": "Incidents don't wait for the Tuesday walkthrough. So I built Nightward — AI agents on every job site camera, every shift, flagging PPE and scaffolding failures in real time, verifying worker certs before they clock in, and auto-filing OSHA 1926 reports nightly. Live soon.",
+                "url": "https://x.com/polsia/status/2082364224605680081",
+                "source": "@polsia",
+                "date": "Wed Jul 29 07:14:54 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 0,
+                  "views": null
+                }
+              },
+              {
+                "title": "Big update for startup founders, marketers, and AI builders.",
+                "summary": "Big update for startup founders, marketers, and AI builders.\n\nKami is an open-source AI-powered GTM platform built to automate outreach, distribution, and growth workflows for startups. Instead of manually managing marketing and customer outreach, teams can use AI agents to handle repetitive tasks, helping them launch and scale products more efficiently.\n\nDesigned to work with Hermes AI agents, Kami enables businesses to automate go-to-market activities while giving teams more time to focus on product development and customer engagement. As AI continues to transform business operations, intelligent automation is making it easier for startups to grow with smaller teams.\n\nThe future of startup growth is shifting from manual execution to AI-powered workflows, where intelligent agents can support marketing, outreach, and business development from a single platform.\n\nDo you think AI agents will become an essential part of every startup's growth strategy?\n\nhttps://t.co/pwZnfB8uge\n\n#Kami #AI #ArtificialIntelligence #Startups #Marketing #GTM #AIAgents #Automation #Technology #ApniCommunity",
+                "url": "https://x.com/apnipathshalain/status/2082364179256676563",
+                "source": "@apnipathshalain",
+                "date": "Wed Jul 29 07:14:43 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 0,
+                  "views": null
+                }
+              },
+              {
+                "title": "You're still writing prompts like it's 2024.",
+                "summary": "You're still writing prompts like it's 2024.\n\nThe best AI users don't write better prompts — they build better systems. Structured outputs, multi-step agents, retrieval-augmented generation, and evals.\n\nThe shift from \"prompt engineer\" to \"AI engineer\" is the biggest career opportunity in tech right now. A prompt is a single request. A system is a loop: plan → execute → evaluate → iterate.\n\nOne is a chat. The other is software.\n\nThe gap between \"I use ChatGPT\" and \"I build with AI\" is exactly this.",
+                "url": "https://x.com/TeksCreate/status/2082364170444349900",
+                "source": "@TeksCreate",
+                "date": "Wed Jul 29 07:14:41 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 0,
+                  "views": "2"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G08_multi_wait_without_tool",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Agent phải tôn trọng yêu cầu chờ và trả lời trực tiếp ở turn cuối thay vì chủ động gọi tool."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tôi đang chuẩn bị một yêu cầu kiểm tra nguồn."
+        },
+        {
+          "role": "user",
+          "content": "Trước khi bắt đầu, hãy chờ hướng dẫn tiếp theo."
+        },
+        {
+          "role": "user",
+          "content": "Chưa cần làm gì cả; chỉ trả lời rằng bạn đã hiểu."
+        }
+      ],
+      "expect": {
+        "no_tool": true
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [],
+        "actual_text": "Tôi đã hiểu.",
+        "case_failure_type": "unnecessary_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G09_multi_format_bullet_digest",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Carry hai nguồn đã có và ánh xạ yêu cầu ở turn cuối sang format template=bullets cùng headline chính xác."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Nguồn 1: AI Lab, https://example.com/ai, tóm tắt: mô hình mới. Nguồn 2: Robotics Lab, https://example.org/robotics, tóm tắt: robot mới."
+        },
+        {
+          "role": "user",
+          "content": "Hãy tạo digest từ đúng hai nguồn trên."
+        },
+        {
+          "role": "user",
+          "content": "Trình bày dạng bullet và đặt tiêu đề là Tổng hợp AI."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "format",
+            "args": {
+              "template": "bullets",
+              "headline": "Tổng hợp AI"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "format",
+            "args": {
+              "items": [
+                {
+                  "title": "AI Lab",
+                  "url": "https://example.com/ai",
+                  "summary": "mô hình mới"
+                },
+                {
+                  "title": "Robotics Lab",
+                  "url": "https://example.org/robotics",
+                  "summary": "robot mới"
+                }
+              ],
+              "template": "bullets",
+              "headline": "Tổng hợp AI"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "format",
+          "args": {
+            "items": [
+              {
+                "title": "AI Lab",
+                "url": "https://example.com/ai",
+                "summary": "mô hình mới"
+              },
+              {
+                "title": "Robotics Lab",
+                "url": "https://example.org/robotics",
+                "summary": "robot mới"
+              }
+            ],
+            "template": "bullets",
+            "headline": "Tổng hợp AI"
+          },
+          "result": {
+            "tool": "render_digest",
+            "template": "bullets",
+            "markdown": "- mô hình mới - [example.com](https://example.com/ai)\n- robot mới - [example.org](https://example.org/robotics)",
+            "item_count": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "G10_multi_confirm_before_telegram",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Hành động Telegram ở turn cuối phải dừng tại confirmation boundary và gọi clarify yes_no trước send."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tôi đã soạn xong bản tin AI sáng nay."
+        },
+        {
+          "role": "user",
+          "content": "Tôi muốn đăng nó lên Telegram."
+        },
+        {
+          "role": "user",
+          "content": "Trước khi gửi, hãy hỏi tôi xác nhận có hoặc không."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "question": "Bạn có muốn gửi bản tin AI này lên Telegram không?",
+              "response_type": "yes_no"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Bạn có muốn gửi bản tin AI này lên Telegram không?",
+            "response_type": "yes_no"
+          },
+          "result": {
+            "tool": "ask_user",
+            "question": "Bạn có muốn gửi bản tin AI này lên Telegram không?",
+            "response_type": "yes_no",
+            "options": [],
+            "awaiting_user": true
+          }
+        }
+      ]
+    }
+  ]
+}

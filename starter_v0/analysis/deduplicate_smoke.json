@@ -1,0 +1,42 @@
+{
+  "tool": "deduplicate",
+  "test_type": "direct_smoke",
+  "implementation": "tools/deduplicate/tool.py",
+  "input": {
+    "items": [
+      {
+        "title": "AI Update",
+        "url": "https://example.com/ai?utm_source=newsletter"
+      },
+      {
+        "title": "AI Update copy",
+        "url": "https://example.com/ai/"
+      },
+      {
+        "title": "Robotics",
+        "url": "https://example.org/robotics"
+      }
+    ]
+  },
+  "output": {
+    "tool": "deduplicate",
+    "input_count": 3,
+    "removed_count": 1,
+    "items": [
+      {
+        "title": "AI Update",
+        "url": "https://example.com/ai?utm_source=newsletter"
+      },
+      {
+        "title": "Robotics",
+        "url": "https://example.org/robotics"
+      }
+    ]
+  },
+  "assertions": {
+    "input_count_is_3": true,
+    "removed_count_is_1": true,
+    "unique_item_count_is_2": true,
+    "first_occurrence_and_order_preserved": true
+  }
+}

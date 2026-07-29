@@ -22,3 +22,6 @@ arxiv_papers/
 Thumbs.db
 .idea/
 .vscode/
+
+# Local browser-validation artifacts
+starter_v0/.playwright-cli/

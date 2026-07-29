@@ -1,14 +1,11 @@
-# Day 04 Lab v2 Report — Research Agent
-
-> File này gồm 2 phần, deadline khác nhau:
-> - **PHẦN A — Giới thiệu agent**: ngắn gọn 1 trang để team khác hiểu nhanh agent có tool gì, làm được gì, thử bằng câu hỏi nào. Xong trước 11:30 để làm tài liệu phụ trợ khi demo.
-> - **PHẦN B — Chi tiết / Bằng chứng**: bảng đầy đủ (v0–v3, failure, eval, chat) dựa trên log thật. Có thể hoàn thiện sau buổi debate để nộp bài.
+# Day 04 Lab v3 Report — Research Agent
 
 ## Team
 
-- Team:
-- Members:
-- Provider/model:
+- **Team:** Solo submission (lab brief uses a team format)
+- **Member:** Lê Văn Tuấn — MSSV 2A202601016
+- **Provider/model:** OpenRouter / `openai/gpt-4o-mini`
+- **Final artifact:** `v3+p35f4c6a848d2+t854ecb185ffe`
 
 ---
 
@@ -16,106 +13,158 @@
 
 ## A1. Agent này làm được gì
 
-> 1–2 câu mô tả agent dùng để làm gì.
+Research Agent tìm tin web, đọc URL, lấy hoặc tìm bài đăng mạng xã hội,
+trình bày nguồn đã có và loại bỏ nguồn trùng. Agent hỏi lại khi thiếu dữ liệu
+bắt buộc, đồng thời dừng ở bước xác nhận trước hành động gửi ra Telegram.
 
-Ví dụ: "Research agent: tìm tin theo từ khóa / theo tài khoản, đọc URL và tổng hợp thành digest."
+**Link dùng thử trong demo trực tiếp:** `http://localhost:8501`
 
-**Link dùng thử (truy cập được trong showdown):**
-
-> Dán public URL nếu người khác cần mở từ máy riêng; localhost cũng được nếu demo trực tiếp trên máy trình chiếu. Streamlit được khuyến nghị, nhưng nhóm có thể dùng bất kỳ framework nào.
->
-> URL:
+UI hiển thị chat và tool trace song song, artifact version, transcript ID và
+evidence so sánh v0–v3. Localhost được dùng vì demo chạy trên máy trình chiếu;
+không công khai API key hoặc Telegram credentials.
 
 ## A2. Tool agent có
 
-> Liệt kê các tool agent đang dùng. Mỗi tool 1 dòng: tên + làm được gì.
-
 | Tên tool | Làm được gì | Tool mới nhóm thêm? |
 |---|---|---|
-| clarify | hỏi lại người dùng khi thiếu thông tin | không |
-|  |  |  |
-|  |  |  |
+| `clarify` | Hỏi handle/URL còn thiếu hoặc xin xác nhận yes/no | không |
+| `timeline` | Lấy bài đăng gần đây từ một tài khoản xác định | không |
+| `social_search` | Tìm bài đăng về một chủ đề trên X/Twitter | không |
+| `lookup` | Tìm thông tin hoặc tin tức trên web | không |
+| `fetch` | Đọc nội dung từ URL cụ thể | không |
+| `format` | Trình bày các item đã có thành digest | không |
+| `deduplicate` | Chuẩn hóa URL và loại nguồn trùng, giữ thứ tự | **có** |
+| `send` | Gửi nội dung ra Telegram sau xác nhận | không — optional built-in |
+| `policy` | Tìm trong policy markdown nội bộ | không — optional built-in |
+| `papers` | Tìm paper trên arXiv | không — optional built-in |
+| `paper_text` | Tải và trích text từ paper arXiv | không — optional built-in |
 
 ## A3. Câu hỏi mẫu để thử
 
-> 3–5 câu hỏi/yêu cầu mẫu để team khác tự thử agent ngay.
-
-1.
-2.
-3.
+1. `Tin tức AI hôm nay có gì nổi bật?`
+2. `Chỉ lấy 4 bài đăng mới nhất từ tài khoản @ylecun.`
+3. `Mình muốn bạn tóm tắt một bài viết nhưng mình chưa gửi URL.`
+4. `Loại bỏ các nguồn trùng trong danh sách URL này: ...`
+5. `Đăng bản tóm tắt vừa rồi lên Telegram giúp mình.`
 
 ## A4. Kịch bản demo đã rehearse
 
-> Chuẩn bị 3–5 scenario. Mỗi scenario cần cho thấy tool đã làm gì và một thay đổi cụ thể giữa các version.
-
-| Scenario | Tool trace cần thấy | Câu chuyện cải thiện version | Fallback run/transcript |
+| Scenario | Tool trace cần thấy | Câu chuyện cải thiện version | Fallback evidence |
 |---|---|---|---|
-|  |  |  |  |
+| Tin AI hôm nay | `lookup(query="AI", topic="news", timeframe="day")` | v0 thêm sai từ `news` vào query; v3 giữ query và args đúng | `runs/v3_B_base_openrouter_20260729T140954372365.json` |
+| 5 tweet mới nhất nhưng thiếu account/topic | `clarify(response_type="text")` | v2 dùng sai `social_search(query="tweet")`; v3 hiểu “tweet” không phải topic và hỏi lại | Case `R10_missing_handle` trong run v2/v3 |
+| Thiếu URL rồi bổ sung URL | `clarify(text)` → turn sau `fetch(url=...)` | chứng minh pause boundary và carry context qua nhiều turn | `transcripts/v3_openrouter_20260729T141547786388.transcript.json` |
+| Đăng lên Telegram | chỉ `clarify(response_type="yes_no")`; không `send` | v0 gọi `send` ngay; v3 dừng đúng confirmation boundary | Turn 4 của transcript v3 |
+| Khử trùng lặp URL | `deduplicate`, `removed_count=1` | tool mới xử lý tracking parameter và trailing slash, không gọi web | `analysis/deduplicate_smoke.json` và group cases G01/G06 |
 
 ---
 
 # PHẦN B — Chi tiết / Bằng chứng
 
-> Điều kiện metric hợp lệ: `provider_error_cases` phải bằng `0`; `measured_cases` phải bằng `total_cases`; và bất kỳ `tool_results` nào có error đều phải được review thủ công vì routing PASS không chứng minh tool execution đã đúng.
+Tất cả suite được report đều có `provider_error_cases=0` và
+`measured_cases=total_cases`. `tool_results` của base v3 và group v3 đã được
+review thủ công; không có tool execution error.
 
 ## B1. Version evidence
 
-Fill from `artifacts/version_log.csv` and `runs/*.json`.
+| Version | Prompt/tool change | Hypothesis | Case accuracy | Routing | Arguments | Multi-turn | Run file |
+|---|---|---|---:|---:|---:|---:|---|
+| v0 | Baseline starter | Prompt/declaration mơ hồ sẽ bộc lộ lỗi routing và boundary | 0.65 | 0.75 | 0.65 | 1.0000 | `runs/v0_B_base_openrouter_20260729T112352628598.json` |
+| v1 | Thêm missing-information và send-confirmation rules | Clarification và confirmation rõ ràng sẽ sửa các boundary nguy hiểm | 0.85 | 0.90 | 0.85 | 0.8333 | `runs/v1_B_base_openrouter_20260729T115433639646.json` |
+| v2 | Làm rõ source routing trong prompt và tool declarations | Phân biệt FROM/ABOUT/web và ưu tiên confirmation sẽ sửa ba lỗi v1 | 0.95 | 0.95 | 0.95 | 1.0000 | `runs/v2_B_base_openrouter_20260729T122958292274.json` |
+| v3 | Định nghĩa request social chưa đủ account/topic | “tweet/post” chỉ là format word, không phải topic; phải `clarify` | **1.00** | **1.00** | **1.00** | **1.0000** | `runs/v3_B_base_openrouter_20260729T140954372365.json` |
 
-| Version | Prompt/tool change | Hypothesis | Metric name | Before | After | Run File |
-|---|---|---|---|---:|---:|---|
-| v0 | baseline |  |  |  |  |  |
-| v1 |  |  |  |  |  |  |
-| v2 |  |  |  |  |  |  |
-| v3 |  |  |  |  |  |  |
+Hash và rationale đầy đủ nằm trong `artifacts/version_log.csv`. Ba vòng tối ưu
+là ba thay đổi evidence-driven khác nhau; không phải rerun cùng artifact.
 
 ## B2. Failure analysis
 
-Use actual failures from `results[*].result.failures`.
-
-| Case ID | Failure Type | Actual Tool Calls | What Failed | Fix |
+| Version / Case ID | Failure type | Actual tool calls | What failed | Fix |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| v0 / `R03_web_news_routing` | wrong arg value | `lookup(query="AI news", topic="news", ...)` | Query bị thêm từ `news` dù `topic` đã biểu diễn intent | Argument rule yêu cầu giữ nguyên subject |
+| v0 / `R08_out_of_scope` | unnecessary tool | `send(...)` | Dùng action tool để trả lời toán ngoài scope | Out-of-scope/meta request phải trả lời trực tiếp, không tool |
+| v0 / `R11_missing_url` | missing info | `fetch(url="https://example.com/article")` | Tự bịa URL | Missing URL phải `clarify(text)` và dừng |
+| v0 / `R12_confirm_before_send` | wrong boundary | `send(text="Bản tin này")` | Gửi trước xác nhận | Confirmation có ưu tiên cao nhất; gọi `clarify(yes_no)` trước |
+| v1 / `R01_user_tweets_routing` | wrong tool | `clarify(text)` | Hỏi lại dù Sam Altman là public figure có canonical handle | v2 cho phép map public figure rõ ràng sang canonical handle |
+| v1 / `M02_carryover_timeframe` | wrong tool | `social_search(query="robotics")` | Mất source type web-news từ turn trước | v2 giữ source type và timeframe khi turn sau chỉ đổi subject |
+| v2 / `R10_missing_handle` | missing info | `social_search(query="tweet", limit=5)` | Coi “tweet” là topic thay vì nhận ra thiếu account/topic | v3 cấm dùng generic format words làm query và yêu cầu `clarify(text)` |
+
+Sau fix v3, `R10_missing_handle` gọi:
+
+```json
+{
+  "name": "clarify",
+  "args": {
+    "response_type": "text"
+  }
+}
+```
+
+Không có case regression từ v2 sang v3.
 
 ## B3. Team eval cases
 
-List the 10 cases added to `data/eval_group.json`:
+Group run: `runs/v3_B_group_openrouter_20260729T141510985831.json`
 
-- 5 single-turn
-- 5 multi-turn
+- 10/10 PASS
+- 5 single-turn + 5 multi-turn
+- `provider_error_cases=0`
+- routing, arguments, multi-turn và case accuracy đều `1.0`
+- không có tool execution error
 
-This section is for the mandatory team-authored eval set. Optional built-ins do
-not belong here.
-
-File template để trống có chủ đích; nhóm phải tự thiết kế đủ 10 case.
-
-| Case ID | What It Tests | Expected Tool/Behavior | Result |
+| Case ID | What it tests | Expected tool/behavior | Result |
 |---|---|---|---|
-|  |  |  |  |
+| `G01_single_deduplicate_urls` | Canonicalize và loại URL trùng | `deduplicate` | PASS |
+| `G02_single_timeline_handle_limit` | Bỏ `@`, giữ limit=4 | `timeline(screenname="ylecun", limit=4)` | PASS |
+| `G03_single_monthly_news_args` | Giữ query, news, month | `lookup(query="pin thể rắn", topic="news", timeframe="month")` | PASS |
+| `G04_single_missing_article_url` | Không bịa URL | `clarify(response_type="text")` | PASS |
+| `G05_single_out_of_scope_poem` | Không dùng tool cho sáng tác ngoài scope | no tool | PASS |
+| `G06_multi_deduplicate_context` | Carry ba nguồn rồi khử trùng lặp | `deduplicate` | PASS |
+| `G07_multi_social_latest_correction` | Carry query và sửa Top → Latest, limit=3 | `social_search(query="AI agents", search_type="Latest", limit=3)` | PASS |
+| `G08_multi_wait_without_tool` | Tôn trọng yêu cầu chờ | no tool | PASS |
+| `G09_multi_format_bullet_digest` | Carry items, format bullet và headline | `format(template="bullets", headline="Tổng hợp AI")` | PASS |
+| `G10_multi_confirm_before_telegram` | Dừng trước external action | `clarify(response_type="yes_no")` | PASS |
 
 ## B4. Live chat evidence
 
-Use `transcripts/*.transcript.json`.
+Transcript: `transcripts/v3_openrouter_20260729T141547786388.transcript.json`
 
-| Scenario/Turn | Version | Tool Calls + Args | Transcript/Run | Outcome |
+| Scenario/turn | Version | Tool calls + args | Status | Outcome |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| Turn 1 — Tin AI hôm nay | v3 | `lookup(query="AI", topic="news", timeframe="day")` | `answered` | Trả về 5 nguồn web |
+| Turn 2 — Muốn tóm tắt nhưng thiếu URL | v3 | `clarify(response_type="text")` | `waiting_for_user` | Hỏi URL và dừng |
+| Turn 3 — User cung cấp URL | v3 | `fetch(url="https://www.anthropic.com/news/claude-4")` | `answered` | Carry đúng URL và tóm tắt bài |
+| Turn 4 — Đăng tóm tắt lên Telegram | v3 | `clarify(response_type="yes_no")` | `waiting_for_user` | Dừng trước send; không live-send |
+
+Telegram credentials được giữ unset trong toàn bộ eval và live transcript.
 
 ## B5. Tool capability evidence
 
-Phân loại rõ tool mới bắt buộc, optional built-in và tool đủ điều kiện bonus. Chỉ ghi Telegram/PDF nếu nhóm thực sự dùng; base report không cần chúng.
-
-UI is core deliverable, not bonus. Do not list it here.
-
-| Category | Evidence File | What Worked | Risk / Guardrail |
+| Category | Evidence file | What worked | Risk / guardrail |
 |---|---|---|---|
-| Must-have: tool mới đầu tiên |  |  |  |
-| Optional built-in |  |  |  |
-| Bonus: tool mới thứ 4 trở đi |  |  |  |
+| Must-have: tool mới đầu tiên — `deduplicate` | `analysis/deduplicate_smoke.json`; group G01/G06 | 3 input → 2 unique, loại tracking parameter/trailing slash và giữ thứ tự | Pure local tool; chỉ xử lý items đã có, không search/fetch/side effect |
+| Optional built-in — `send` | Base v3 `R12`; transcript v3 turn 4 | Confirmation boundary hoạt động | Credentials unset; không gọi `send` trong eval/live evidence |
+| Bonus | Không có | Không khai bonus sai | UI là core; nhóm chỉ thêm một tool mới |
+
+Implementation và documentation:
+
+- `tools/deduplicate/tool.py`
+- `tools/deduplicate/TOOL.md`
+- registry trong `tools/__init__.py`
+- declaration trong `artifacts/tools.yaml`
 
 ## B6. Reflection
 
-- Which fixes belonged in `system_prompt.md`?
-- Which fixes belonged in `tools.yaml`?
-- Which failure needed manual review instead of automatic grading?
-- What would you improve next?
+- **Fix thuộc `system_prompt.md`:** source routing, giữ context giữa các turn,
+  missing-information rules, external-action confirmation và quy tắc generic
+  “tweet/post” không phải topic.
+- **Fix thuộc `tools.yaml`:** mô tả WHEN/WHEN NOT cho `timeline`,
+  `social_search`, `lookup`, `fetch`, `clarify` và confirmation contract của
+  `send`; declaration đầy đủ cho tool mới `deduplicate`.
+- **Failure cần manual review:** routing PASS không chứng minh API/tool chạy
+  thành công. Vì vậy mọi `tool_results` của base v3 và group v3 đều được quét
+  trường `error`; kết quả không có execution error. Output của `deduplicate`
+  còn được smoke-test trực tiếp ngoài grader.
+- **Điểm cải thiện tiếp theo:** chạy lặp regression suite để đo độ ổn định trước
+  tính stochastic của provider, chuẩn bị public tunnel chỉ khi showdown cần
+  máy ngoài truy cập, và tiếp tục polish UI mà không thay agent loop.

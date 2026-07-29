@@ -1,0 +1,103 @@
+{
+  "transcript_id": "ui_v2_openrouter_20260729T134235131988",
+  "version": "v2",
+  "artifact_version": "v2+p79e61215c36f+t854ecb185ffe",
+  "prompt_hash": "79e61215c36f1f161c1c60385014de5b0a5911d25c4960b49e6c78b3d7cf1fcb",
+  "tools_hash": "854ecb185ffe1e63d1366937aa9fb3961fefb4362d04640dd8f943870b899308",
+  "provider": "openrouter",
+  "model": "openai/gpt-4o-mini",
+  "system_prompt": "/home/zukanopro/workspace/Lab/Day4/starter_v0/artifacts/system_prompt.md",
+  "tools": "/home/zukanopro/workspace/Lab/Day4/starter_v0/artifacts/tools.yaml",
+  "history_window": 5,
+  "max_tool_rounds": 4,
+  "source": "streamlit",
+  "created_at": "2026-07-29T13:42:35",
+  "updated_at": "2026-07-29T13:43:17",
+  "turns": [
+    {
+      "turn_index": 1,
+      "started_at": "2026-07-29T13:42:35",
+      "user": "Hãy đọc và tóm tắt URL này giúp mình.",
+      "status": "answered",
+      "assistant_text": "Vui lòng cung cấp URL mà bạn muốn tôi đọc và tóm tắt.",
+      "rounds": [
+        {
+          "round": 1,
+          "assistant_text": "Vui lòng cung cấp URL mà bạn muốn tôi đọc và tóm tắt.",
+          "tool_calls": [],
+          "tool_results": []
+        }
+      ],
+      "tool_events": [],
+      "ended_at": "2026-07-29T13:42:36"
+    },
+    {
+      "turn_index": 2,
+      "started_at": "2026-07-29T13:43:06",
+      "user": "https://anthropic.com/news/claude",
+      "status": "answered",
+      "assistant_text": "Trang bạn yêu cầu không tồn tại và đã dẫn đến lỗi 404. Bạn có thể kiểm tra lại URL hoặc cung cấp một liên kết khác để tôi có thể giúp bạn.",
+      "rounds": [
+        {
+          "round": 1,
+          "assistant_text": null,
+          "tool_calls": [
+            {
+              "name": "fetch",
+              "args": {
+                "url": "https://anthropic.com/news/claude"
+              }
+            }
+          ],
+          "tool_results": [
+            {
+              "tool": "fetch",
+              "args": {
+                "url": "https://anthropic.com/news/claude"
+              },
+              "result": {
+                "tool": "read_url",
+                "url": "https://anthropic.com/news/claude",
+                "items": [
+                  {
+                    "title": "Not Found \\ Anthropic",
+                    "url": "https://anthropic.com/news/claude",
+                    "source": "anthropic.com",
+                    "summary": "A 404 poem by Claude Haiku 4.5Claude Sonnet 5Claude Opus 5Claude Fable 5\n\nWhat onc"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "assistant_text": "Trang bạn yêu cầu không tồn tại và đã dẫn đến lỗi 404. Bạn có thể kiểm tra lại URL hoặc cung cấp một liên kết khác để tôi có thể giúp bạn.",
+          "tool_calls": [],
+          "tool_results": []
+        }
+      ],
+      "tool_events": [
+        {
+          "tool": "fetch",
+          "args": {
+            "url": "https://anthropic.com/news/claude"
+          },
+          "result": {
+            "tool": "read_url",
+            "url": "https://anthropic.com/news/claude",
+            "items": [
+              {
+                "title": "Not Found \\ Anthropic",
+                "url": "https://anthropic.com/news/claude",
+                "source": "anthropic.com",
+                "summary": "A 404 poem by Claude Haiku 4.5Claude Sonnet 5Claude Opus 5Claude Fable 5\n\nWhat onc"
+              }
+            ]
+          }
+        }
+      ],
+      "ended_at": "2026-07-29T13:43:17"
+    }
+  ]
+}
