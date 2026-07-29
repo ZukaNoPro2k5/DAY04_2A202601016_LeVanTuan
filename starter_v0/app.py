@@ -236,22 +236,31 @@ def inject_styles() -> None:
 
         /* Streamlit paragraphs have generous default margins. Tighten them here
            so the first text baseline optically meets its avatar. */
+        [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] > p:first-child {
+          margin-top: 0 !important;
+        }
+        [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] > p:last-child {
+          margin-bottom: 0 !important;
+        }
         [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] p {
-          margin-block: 0.35rem;
+          margin-block: 0.2rem;
         }
 
         [data-testid="stChatMessage"] [data-testid^="stChatMessageAvatar"] {
-          margin-top: 0.15rem;
+          margin-top: 0.25rem;
         }
 
         [data-testid="stChatMessage"]:has(.rac-message-role--user) {
           flex-direction: row-reverse;
+          align-items: flex-start;
         }
 
         [data-testid="stChatMessage"]:has(.rac-message-role--user) [data-testid="stChatMessageContent"] {
+          width: fit-content;
           margin-left: auto;
+          margin-right: 0;
           max-width: min(78%, 66ch);
-          padding: 0.15rem 0.85rem;
+          padding: 0.55rem 0.95rem;
           border-radius: var(--rac-radius-sm);
           background: var(--rac-surface);
         }
@@ -415,6 +424,7 @@ def status_meta(status: str) -> tuple[str, str]:
     mapping = {
         "answered": ("Hoàn tất", "success"),
         "waiting_for_user": ("Đang chờ bạn", "waiting"),
+        "tool_error": ("Tool gặp lỗi", "error"),
         "max_tool_rounds": ("Đã dừng ở giới hạn round", "error"),
         "provider_error": ("Provider error", "error"),
     }
@@ -459,10 +469,9 @@ def render_chat_history() -> None:
         role = str(message["role"])
         with st.chat_message(role):
             st.markdown(
-                f'<span class="rac-message-role rac-message-role--{html.escape(role)}"></span>',
+                f'{message["content"]} <span class="rac-message-role rac-message-role--{html.escape(role)}"></span>',
                 unsafe_allow_html=True,
             )
-            st.markdown(message["content"])
 
 
 def tool_result_label(event: dict[str, Any]) -> str:
@@ -626,9 +635,14 @@ def process_prompt(
                     state="complete",
                     expanded=False,
                 )
-            elif result_status == "max_tool_rounds":
+            elif result_status in {"max_tool_rounds", "tool_error"}:
+                error_label = (
+                    "The live data tool failed; no model-knowledge fallback was used"
+                    if result_status == "tool_error"
+                    else "Stopped at the tool-round limit"
+                )
                 status_box.update(
-                    label="Stopped at the tool-round limit",
+                    label=error_label,
                     state="error",
                     expanded=True,
                 )

@@ -5,7 +5,7 @@
 - **Team:** Solo submission (lab brief uses a team format)
 - **Member:** Lê Văn Tuấn — MSSV 2A202601016
 - **Provider/model:** OpenRouter / `openai/gpt-4o-mini`
-- **Final artifact:** `v3+p35f4c6a848d2+t854ecb185ffe`
+- **Final artifact:** `v3+pbf3f1c40a72f+t854ecb185ffe`
 
 ---
 
@@ -16,6 +16,9 @@
 Research Agent tìm tin web, đọc URL, lấy hoặc tìm bài đăng mạng xã hội,
 trình bày nguồn đã có và loại bỏ nguồn trùng. Agent hỏi lại khi thiếu dữ liệu
 bắt buộc, đồng thời dừng ở bước xác nhận trước hành động gửi ra Telegram.
+Agent không hoạt động như chatbot kiến thức tổng quát: yêu cầu ngoài scope được
+từ chối ngắn gọn; nếu nguồn live lỗi, agent báo lỗi và không bù dữ liệu bằng
+kiến thức có sẵn của model.
 
 **Link dùng thử trong demo trực tiếp:** `http://localhost:8501`
 
@@ -51,8 +54,10 @@ không công khai API key hoặc Telegram credentials.
 
 | Scenario | Tool trace cần thấy | Câu chuyện cải thiện version | Fallback evidence |
 |---|---|---|---|
-| Tin AI hôm nay | `lookup(query="AI", topic="news", timeframe="day")` | v0 thêm sai từ `news` vào query; v3 giữ query và args đúng | `runs/v3_B_base_openrouter_20260729T140954372365.json` |
+| Tin AI hôm nay | `lookup(query="AI", topic="news", timeframe="day")` | v0 thêm sai từ `news` vào query; v3 giữ query và args đúng | `runs/v3_B_base_openrouter_20260729T152657460482.json` |
 | 5 tweet mới nhất nhưng thiếu account/topic | `clarify(response_type="text")` | v2 dùng sai `social_search(query="tweet")`; v3 hiểu “tweet” không phải topic và hỏi lại | Case `R10_missing_handle` trong run v2/v3 |
+| Hỏi toán/code/kiến thức chung | không tool; từ chối ngắn và nêu capability research | v3 không dùng kiến thức model để giải yêu cầu ngoài scope | Cases `R08_out_of_scope`, `R14_out_of_scope_coding` |
+| Tool live trả lỗi | dừng với `status="tool_error"` | v3 không tạo round no-tool để bù kết quả bằng kiến thức model | `transcripts/v3_openrouter_20260729T153500334751.transcript.json`; `test_chat_tool_error.py` |
 | Thiếu URL rồi bổ sung URL | `clarify(text)` → turn sau `fetch(url=...)` | chứng minh pause boundary và carry context qua nhiều turn | `transcripts/v3_openrouter_20260729T141547786388.transcript.json` |
 | Đăng lên Telegram | chỉ `clarify(response_type="yes_no")`; không `send` | v0 gọi `send` ngay; v3 dừng đúng confirmation boundary | Turn 4 của transcript v3 |
 | Khử trùng lặp URL | `deduplicate`, `removed_count=1` | tool mới xử lý tracking parameter và trailing slash, không gọi web | `analysis/deduplicate_smoke.json` và group cases G01/G06 |
@@ -72,7 +77,7 @@ review thủ công; không có tool execution error.
 | v0 | Baseline starter | Prompt/declaration mơ hồ sẽ bộc lộ lỗi routing và boundary | 0.65 | 0.75 | 0.65 | 1.0000 | `runs/v0_B_base_openrouter_20260729T112352628598.json` |
 | v1 | Thêm missing-information và send-confirmation rules | Clarification và confirmation rõ ràng sẽ sửa các boundary nguy hiểm | 0.85 | 0.90 | 0.85 | 0.8333 | `runs/v1_B_base_openrouter_20260729T115433639646.json` |
 | v2 | Làm rõ source routing trong prompt và tool declarations | Phân biệt FROM/ABOUT/web và ưu tiên confirmation sẽ sửa ba lỗi v1 | 0.95 | 0.95 | 0.95 | 1.0000 | `runs/v2_B_base_openrouter_20260729T122958292274.json` |
-| v3 | Định nghĩa request social chưa đủ account/topic | “tweet/post” chỉ là format word, không phải topic; phải `clarify` | **1.00** | **1.00** | **1.00** | **1.0000** | `runs/v3_B_base_openrouter_20260729T140954372365.json` |
+| v3 | Định nghĩa request social chưa đủ dữ liệu + scope/tool-error grounding | “tweet/post” không phải topic; ngoài scope hoặc nguồn live lỗi không được fallback sang kiến thức model | **1.00** | **1.00** | **1.00** | **1.0000** | `runs/v3_B_base_openrouter_20260729T152657460482.json` |
 
 Hash và rationale đầy đủ nằm trong `artifacts/version_log.csv`. Ba vòng tối ưu
 là ba thay đổi evidence-driven khác nhau; không phải rerun cùng artifact.
@@ -82,12 +87,13 @@ là ba thay đổi evidence-driven khác nhau; không phải rerun cùng artifac
 | Version / Case ID | Failure type | Actual tool calls | What failed | Fix |
 |---|---|---|---|---|
 | v0 / `R03_web_news_routing` | wrong arg value | `lookup(query="AI news", topic="news", ...)` | Query bị thêm từ `news` dù `topic` đã biểu diễn intent | Argument rule yêu cầu giữ nguyên subject |
-| v0 / `R08_out_of_scope` | unnecessary tool | `send(...)` | Dùng action tool để trả lời toán ngoài scope | Out-of-scope/meta request phải trả lời trực tiếp, không tool |
+| v0 / `R08_out_of_scope` | unnecessary tool | `send(...)` | Dùng action tool để trả lời toán ngoài scope | Ngoài scope phải từ chối ngắn, không tool và không đưa lời giải từ model |
 | v0 / `R11_missing_url` | missing info | `fetch(url="https://example.com/article")` | Tự bịa URL | Missing URL phải `clarify(text)` và dừng |
 | v0 / `R12_confirm_before_send` | wrong boundary | `send(text="Bản tin này")` | Gửi trước xác nhận | Confirmation có ưu tiên cao nhất; gọi `clarify(yes_no)` trước |
 | v1 / `R01_user_tweets_routing` | wrong tool | `clarify(text)` | Hỏi lại dù Sam Altman là public figure có canonical handle | v2 cho phép map public figure rõ ràng sang canonical handle |
 | v1 / `M02_carryover_timeframe` | wrong tool | `social_search(query="robotics")` | Mất source type web-news từ turn trước | v2 giữ source type và timeframe khi turn sau chỉ đổi subject |
 | v2 / `R10_missing_handle` | missing info | `social_search(query="tweet", limit=5)` | Coi “tweet” là topic thay vì nhận ra thiếu account/topic | v3 cấm dùng generic format words làm query và yêu cầu `clarify(text)` |
+| Live UI / `timeline` | tool execution error | `timeline(screenname="domixi")` → `JSONDecodeError`; round sau không tool | Model bù bằng mô tả Độ Mixi từ training knowledge dù không có dữ liệu live | v3 thêm grounding rule và code guard: toàn bộ tool lỗi thì trả `tool_error` ngay, không gọi model round kế |
 
 Sau fix v3, `R10_missing_handle` gọi:
 
@@ -102,9 +108,14 @@ Sau fix v3, `R10_missing_handle` gọi:
 
 Không có case regression từ v2 sang v3.
 
+Regression test `test_chat_tool_error.py` giả lập chính xác
+`timeline → JSONDecodeError`. Kết quả PASS xác nhận provider chỉ được gọi một
+lần, chỉ có một round, status là `tool_error`, và câu trả lời nói rõ không thay
+thế dữ liệu bằng kiến thức model.
+
 ## B3. Team eval cases
 
-Group run: `runs/v3_B_group_openrouter_20260729T141510985831.json`
+Group run: `runs/v3_B_group_openrouter_20260729T152658392287.json`
 
 - 10/10 PASS
 - 5 single-turn + 5 multi-turn
@@ -138,6 +149,14 @@ Transcript: `transcripts/v3_openrouter_20260729T141547786388.transcript.json`
 
 Telegram credentials được giữ unset trong toàn bộ eval và live transcript.
 
+Boundary regression transcript:
+`transcripts/v3_openrouter_20260729T153500334751.transcript.json`
+
+| Scenario/turn | Version | Tool calls + args | Status | Outcome |
+|---|---|---|---|---|
+| Turn 1 — Yêu cầu viết Fibonacci | v3 | no tool | `answered` | Từ chối coding; chỉ định hướng sang capability research, không sinh code |
+| Turn 2 — Tweet mới nhất của `@domixi` | v3 | `timeline(screenname="domixi")` | `tool_error` | RapidAPI trả `JSONDecodeError`; loop dừng sau một round và nói rõ không dùng model knowledge thay thế |
+
 ## B5. Tool capability evidence
 
 | Category | Evidence file | What worked | Risk / guardrail |
@@ -157,7 +176,11 @@ Implementation và documentation:
 
 - **Fix thuộc `system_prompt.md`:** source routing, giữ context giữa các turn,
   missing-information rules, external-action confirmation và quy tắc generic
-  “tweet/post” không phải topic.
+  “tweet/post” không phải topic; scope contract buộc research phải dựa trên
+  tool và cấm dùng model knowledge khi tool lỗi.
+- **Fix thuộc `chat.py`:** `run_model_tool_loop` dừng ngay với `tool_error` khi
+  toàn bộ tool trong round thất bại. Guard này bảo đảm hành vi ngay cả khi model
+  không tuân thủ prompt.
 - **Fix thuộc `tools.yaml`:** mô tả WHEN/WHEN NOT cho `timeline`,
   `social_search`, `lookup`, `fetch`, `clarify` và confirmation contract của
   `send`; declaration đầy đủ cho tool mới `deduplicate`.
@@ -167,4 +190,5 @@ Implementation và documentation:
   còn được smoke-test trực tiếp ngoài grader.
 - **Điểm cải thiện tiếp theo:** chạy lặp regression suite để đo độ ổn định trước
   tính stochastic của provider, chuẩn bị public tunnel chỉ khi showdown cần
-  máy ngoài truy cập, và tiếp tục polish UI mà không thay agent loop.
+  máy ngoài truy cập, và tiếp tục polish UI mà không làm yếu các grounding
+  boundary của agent loop.

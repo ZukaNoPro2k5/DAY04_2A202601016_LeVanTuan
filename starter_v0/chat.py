@@ -62,8 +62,10 @@ def tool_results_message(events: list[dict[str, Any]]) -> dict[str, str]:
         "content": (
             "TOOL_RESULTS_JSON:\n"
             f"{json_text(events, max_chars=24000)}\n\n"
-            "Use only these tool results. If the user asked for a digest and the items are ready, "
-            "call the formatting tool. Otherwise answer the user directly with cited sources when available."
+            "Use only these tool results. Never replace missing or failed tool data with model knowledge. "
+            "If any result contains an error, explicitly mark that source unavailable and use only successful "
+            "result fields. If the user asked for a digest and the items are ready, call the formatting tool. "
+            "Otherwise answer the user directly with cited sources when available."
         ),
     }
 
@@ -75,6 +77,23 @@ def assistant_tool_message(response_text: str | None, calls: list[ToolCall]) -> 
         "role": "assistant",
         "content": f"{content}\n\nTOOL_CALLS_JSON:\n{json_text(call_summary)}",
     }
+
+
+def tool_error_response(events: list[dict[str, Any]]) -> str:
+    failures: list[str] = []
+    for event in events:
+        result = event.get("result")
+        if not isinstance(result, dict) or not result.get("error"):
+            continue
+        tool_name = str(event.get("tool") or "unknown_tool")
+        error_name = str(result.get("error"))
+        failures.append(f"{tool_name} ({error_name})")
+    failure_text = ", ".join(failures) or "công cụ đã chọn"
+    return (
+        f"Không thể lấy dữ liệu mới vì {failure_text} gặp lỗi. "
+        "Tôi sẽ không thay thế kết quả bằng kiến thức có sẵn của mô hình. "
+        "Bạn có thể thử lại sau hoặc chọn một nguồn khác."
+    )
 
 
 def run_model_tool_loop(
@@ -133,6 +152,18 @@ def run_model_tool_loop(
             non_clarification_events.append(event)
 
         rounds.append(round_record)
+        failed_events = [
+            event
+            for event in non_clarification_events
+            if isinstance(event.get("result"), dict) and event["result"].get("error")
+        ]
+        if non_clarification_events and len(failed_events) == len(non_clarification_events):
+            return {
+                "status": "tool_error",
+                "assistant_text": tool_error_response(failed_events),
+                "rounds": rounds,
+                "tool_events": all_tool_events,
+            }
         working_messages.append(tool_results_message(non_clarification_events))
 
     return {

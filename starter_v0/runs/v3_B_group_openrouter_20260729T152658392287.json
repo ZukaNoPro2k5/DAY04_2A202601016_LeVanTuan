@@ -1,8 +1,8 @@
 {
-  "run_id": "v3_B_group_openrouter_20260729T141510985831",
+  "run_id": "v3_B_group_openrouter_20260729T152658392287",
   "version": "v3",
-  "artifact_version": "v3+p35f4c6a848d2+t854ecb185ffe",
-  "prompt_hash": "35f4c6a848d2fd2c21050b1045f7f22e55951768e233d4373ff9a4c8b893c439",
+  "artifact_version": "v3+pbf3f1c40a72f+t854ecb185ffe",
+  "prompt_hash": "bf3f1c40a72f3fa6bd24cd9f77db9a705e2e7fbc1471b18dfc446d8d6aa1cdb0",
   "tools_hash": "854ecb185ffe1e63d1366937aa9fb3961fefb4362d04640dd8f943870b899308",
   "phase": "B",
   "suite": "group",
@@ -14,7 +14,7 @@
   "dataset_id": "day04_v2_research_group",
   "dataset_role": "group",
   "description": "Bộ eval do Lê Văn Tuấn (2A202601016) thiết kế: đúng 5 single-turn và 5 multi-turn, bao phủ routing, arguments, boundary, missing information, unnecessary tool, out-of-scope và tool deduplicate mới.",
-  "generated_at": "2026-07-29T14:15:10",
+  "generated_at": "2026-07-29T15:26:58",
   "summary": {
     "total_cases": 10,
     "measured_cases": 10,
@@ -173,8 +173,8 @@
                 "date": "Tue Jul 28 19:35:45 +0000 2026",
                 "metrics": {
                   "favorites": 0,
-                  "retweets": 504,
-                  "views": "3901"
+                  "retweets": 522,
+                  "views": "3967"
                 }
               },
               {
@@ -185,8 +185,8 @@
                 "date": "Tue Jul 28 19:35:32 +0000 2026",
                 "metrics": {
                   "favorites": 0,
-                  "retweets": 1806,
-                  "views": "3451"
+                  "retweets": 1845,
+                  "views": "3508"
                 }
               },
               {
@@ -198,7 +198,7 @@
                 "metrics": {
                   "favorites": 0,
                   "retweets": 42,
-                  "views": "4896"
+                  "views": "4926"
                 }
               },
               {
@@ -209,8 +209,8 @@
                 "date": "Mon Jul 27 21:00:46 +0000 2026",
                 "metrics": {
                   "favorites": 0,
-                  "retweets": 45,
-                  "views": "4588"
+                  "retweets": 46,
+                  "views": "4597"
                 }
               }
             ]
@@ -342,7 +342,7 @@
           {
             "name": "clarify",
             "args": {
-              "question": "Bạn có thể cung cấp URL của bài báo mà bạn muốn tóm tắt không?",
+              "question": "Vui lòng cung cấp URL của bài báo mà bạn muốn tóm tắt.",
               "response_type": "text"
             }
           }
@@ -357,12 +357,12 @@
         {
           "tool": "clarify",
           "args": {
-            "question": "Bạn có thể cung cấp URL của bài báo mà bạn muốn tóm tắt không?",
+            "question": "Vui lòng cung cấp URL của bài báo mà bạn muốn tóm tắt.",
             "response_type": "text"
           },
           "result": {
             "tool": "ask_user",
-            "question": "Bạn có thể cung cấp URL của bài báo mà bạn muốn tóm tắt không?",
+            "question": "Vui lòng cung cấp URL của bài báo mà bạn muốn tóm tắt.",
             "response_type": "text",
             "options": [],
             "awaiting_user": true
@@ -388,7 +388,7 @@
         "routing_correct": true,
         "args_correct": true,
         "actual_tool_calls": [],
-        "actual_text": "Mùa hè đến, nắng vàng rực rỡ,  \nCánh diều bay, gió thổi mát mẻ.  \nBên dòng sông, nước chảy trong veo,  \nTiếng cười vang, trẻ nhỏ nô đùa.\n\nHoa phượng nở, đỏ rực sân trường,  \nNhững buổi chiều, cùng nhau tắm mưa.  \nHè về đây, kỷ niệm ngập tràn,  \nThời gian trôi, nhưng lòng vẫn nhớ.",
+        "actual_text": "Xin lỗi, nhưng tôi không thể sáng tác thơ. Tuy nhiên, tôi có thể giúp bạn tìm kiếm thông tin hoặc tài liệu liên quan đến mùa hè. Bạn có muốn tìm hiểu thêm về một chủ đề nào đó không?",
         "case_failure_type": "out_of_scope",
         "observed_mismatch": null,
         "failure_type": null,
@@ -556,11 +556,11 @@
             "search_type": "Latest",
             "items": [
               {
-                "title": "Incidents don't wait for the Tuesday walkthrough. So I built Nightward — AI agents on every job site camera, every shift",
-                "summary": "Incidents don't wait for the Tuesday walkthrough. So I built Nightward — AI agents on every job site camera, every shift, flagging PPE and scaffolding failures in real time, verifying worker certs before they clock in, and auto-filing OSHA 1926 reports nightly. Live soon.",
-                "url": "https://x.com/polsia/status/2082364224605680081",
-                "source": "@polsia",
-                "date": "Wed Jul 29 07:14:54 +0000 2026",
+                "title": "@0xOnyedika always dyor about heliboard bro ",
+                "summary": "@0xOnyedika always dyor about heliboard bro \ngive ai agents tasks to read the open source code fully everything before installing every new updates etc...",
+                "url": "https://x.com/0xZodex/status/2082382301569126881",
+                "source": "@0xZodex",
+                "date": "Wed Jul 29 08:26:44 +0000 2026",
                 "metrics": {
                   "favorites": 0,
                   "retweets": 0,
@@ -568,27 +568,27 @@
                 }
               },
               {
-                "title": "Big update for startup founders, marketers, and AI builders.",
-                "summary": "Big update for startup founders, marketers, and AI builders.\n\nKami is an open-source AI-powered GTM platform built to automate outreach, distribution, and growth workflows for startups. Instead of manually managing marketing and customer outreach, teams can use AI agents to handle repetitive tasks, helping them launch and scale products more efficiently.\n\nDesigned to work with Hermes AI agents, Kami enables businesses to automate go-to-market activities while giving teams more time to focus on product development and customer engagement. As AI continues to transform business operations, intelligent automation is making it easier for startups to grow with smaller teams.\n\nThe future of startup growth is shifting from manual execution to AI-powered workflows, where intelligent agents can support marketing, outreach, and business development from a single platform.\n\nDo you think AI agents will become an essential part of every startup's growth strategy?\n\nhttps://t.co/pwZnfB8uge\n\n#Kami #AI #ArtificialIntelligence #Startups #Marketing #GTM #AIAgents #Automation #Technology #ApniCommunity",
-                "url": "https://x.com/apnipathshalain/status/2082364179256676563",
-                "source": "@apnipathshalain",
-                "date": "Wed Jul 29 07:14:43 +0000 2026",
+                "title": "I used to think of TRON mainly as a place to move USDT. Looking at AI agent payments gave me a much broader view of the ",
+                "summary": "I used to think of TRON mainly as a place to move USDT. Looking at AI agent payments gave me a much broader view of the network.\n\nThis direction connects two mature TRON strengths: high-frequency value transfer and a large stablecoin economy. AI agents add a new type of user to the same financial rails.\n\nTRON is positioning its payment infrastructure for AI agents that need to buy data, compute, content, or services automatically. Machine-to-machine payments need fast settlement and low friction.\n\nIt also connects with network reliability. A TRON block becomes solid after enough distinct active Super Representatives build on it. Under normal conditions, full solidification typically takes around a minute.\n\nAnother useful angle is Bandwidth and Energy. Users can stake TRX to receive Bandwidth or Energy. The network then consumes those resources automatically when the account sends transactions or interacts with smart contracts.\n\nI see this as steady infrastructure work, the kind that becomes more valuable as more people connect to it.\n\nThere is no need to make the story complicated. TRON is useful because it helps digital value move quickly across users, apps, and markets.\n\nTRON keeps proving that a public chain can grow by making digital money easier to move and easier to use.\n\n@justinsuntron @trondao #TRONEcoStar",
+                "url": "https://x.com/im3mortal/status/2082382274675556704",
+                "source": "@im3mortal",
+                "date": "Wed Jul 29 08:26:37 +0000 2026",
                 "metrics": {
                   "favorites": 0,
                   "retweets": 0,
-                  "views": null
+                  "views": "1"
                 }
               },
               {
-                "title": "You're still writing prompts like it's 2024.",
-                "summary": "You're still writing prompts like it's 2024.\n\nThe best AI users don't write better prompts — they build better systems. Structured outputs, multi-step agents, retrieval-augmented generation, and evals.\n\nThe shift from \"prompt engineer\" to \"AI engineer\" is the biggest career opportunity in tech right now. A prompt is a single request. A system is a loop: plan → execute → evaluate → iterate.\n\nOne is a chat. The other is software.\n\nThe gap between \"I use ChatGPT\" and \"I build with AI\" is exactly this.",
-                "url": "https://x.com/TeksCreate/status/2082364170444349900",
-                "source": "@TeksCreate",
-                "date": "Wed Jul 29 07:14:41 +0000 2026",
+                "title": "This is worth watching—not because it's another \"AI tutorial,\" but because it reflects where agentic systems are heading",
+                "summary": "This is worth watching—not because it's another \"AI tutorial,\" but because it reflects where agentic systems are heading.\n\nThe interesting part isn't the graph framework itself.\n\nIt's the shift in thinking:\n\nAgents aren't single prompts anymore.\nThey're interconnected workflows with planning, memory, feedback and long-term state.\n\nIf you're building AI products today, understanding graph engineering is quickly becoming as important as understanding prompting was a year ago.\n\nDefinitely adding this to my weekend watchlist.",
+                "url": "https://x.com/MerlynShelley6/status/2082382151534969005",
+                "source": "@MerlynShelley6",
+                "date": "Wed Jul 29 08:26:08 +0000 2026",
                 "metrics": {
                   "favorites": 0,
                   "retweets": 0,
-                  "views": "2"
+                  "views": "1"
                 }
               }
             ]
@@ -769,7 +769,7 @@
           {
             "name": "clarify",
             "args": {
-              "question": "Bạn có muốn gửi bản tin AI này lên Telegram không?",
+              "question": "Bạn có chắc chắn muốn gửi bản tin AI này lên Telegram không?",
               "response_type": "yes_no"
             }
           }
@@ -784,12 +784,12 @@
         {
           "tool": "clarify",
           "args": {
-            "question": "Bạn có muốn gửi bản tin AI này lên Telegram không?",
+            "question": "Bạn có chắc chắn muốn gửi bản tin AI này lên Telegram không?",
             "response_type": "yes_no"
           },
           "result": {
             "tool": "ask_user",
-            "question": "Bạn có muốn gửi bản tin AI này lên Telegram không?",
+            "question": "Bạn có chắc chắn muốn gửi bản tin AI này lên Telegram không?",
             "response_type": "yes_no",
             "options": [],
             "awaiting_user": true
