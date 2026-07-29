@@ -2,8 +2,8 @@
 
 ## Team
 
-- **Team:** Solo submission (lab brief uses a team format)
-- **Member:** Lê Văn Tuấn — MSSV 2A202601016
+- **Team:** Bàn B2-2
+- **Members:** Nguyễn Trọng Khánh — 2A202602035; Hoàng Tuấn Minh — 2A202601500; Cao Hương Giang — 2A202601420; Lê Văn Tuấn — 2A202601016; Vũ Hoàng Việt — 2A202601250
 - **Provider/model:** OpenRouter / `openai/gpt-4o-mini`
 - **Final artifact:** `v3+pbf3f1c40a72f+t854ecb185ffe`
 
