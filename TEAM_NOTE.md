@@ -10,6 +10,4 @@
 - Lê Văn Tuấn — 2A202601016
 - Vũ Hoàng Việt — 2A202601250
 
-> Note: Lab brief yêu cầu khai báo nhóm nhưng không yêu cầu ghi role/phân công
-> theo từng thành viên. File này chỉ ghi nhận danh sách thành viên chính thức,
-> không suy diễn ownership của từng hạng mục.
+
