@@ -234,6 +234,16 @@ def inject_styles() -> None:
           padding-block: 0.8rem;
         }
 
+        /* Streamlit paragraphs have generous default margins. Tighten them here
+           so the first text baseline optically meets its avatar. */
+        [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] p {
+          margin-block: 0.35rem;
+        }
+
+        [data-testid="stChatMessage"] [data-testid^="stChatMessageAvatar"] {
+          margin-top: 0.15rem;
+        }
+
         [data-testid="stChatMessage"]:has(.rac-message-role--user) {
           flex-direction: row-reverse;
         }
@@ -309,6 +319,13 @@ def inject_styles() -> None:
 
         [data-testid="stChatInput"] textarea {
           font-size: 1rem;
+        }
+
+        @media (min-width: 761px) {
+          /* Keep the fixed composer with the 60% Conversation pane, not the trace. */
+          [data-testid="stChatInput"] {
+            right: calc(40% + 1rem);
+          }
         }
 
         .rac-evidence-pass {
