@@ -77,6 +77,23 @@ tools:
         headline: {type: string, default: "", description: "Tiêu đề"}
       required: [items, template]
 
+  - name: deduplicate
+    description: "Loại bỏ các nguồn trùng lặp khỏi một danh sách kết quả đã có. Dùng khi người dùng yêu cầu làm sạch hoặc khử trùng lặp danh sách; không dùng để tìm kiếm, đọc URL hoặc định dạng digest."
+    parameters:
+      type: object
+      properties:
+        items:
+          type: array
+          description: "Danh sách các nguồn nghiên cứu cần loại bỏ phần tử trùng lặp."
+          items:
+            type: object
+            properties:
+              title: {type: string}
+              url: {type: string}
+              source: {type: string}
+              summary: {type: string}
+      required: [items]
+
   # ---------------- Bonus tools ----------------
   - name: send
     description: "Gửi một đoạn văn bản đi."

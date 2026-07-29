@@ -1,7 +1,251 @@
 {
   "dataset_id": "day04_v2_research_group",
   "dataset_role": "group",
-  "description": "Template để NHÓM tự viết đúng 10 case: 5 single-turn dùng query và 5 multi-turn dùng turns. Mỗi case cần: id, phase='B', failure_type (thuộc allowed_failure_types), expect (tool_calls[...] hoặc no_tool=true), và metadata.what_it_tests. File để trống có chủ đích vì mỗi nhóm phải tự thiết kế các case này.",
+  "description": "Bộ eval do Lê Văn Tuấn (2A202601016) thiết kế: đúng 5 single-turn và 5 multi-turn, bao phủ routing, arguments, boundary, missing information, unnecessary tool, out-of-scope và tool deduplicate mới.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_single_deduplicate_urls",
+      "phase": "B",
+      "query": "Loại bỏ các nguồn trùng trong danh sách này: 1) AI Update — https://example.com/ai?utm_source=newsletter; 2) AI Update copy — https://example.com/ai/; 3) Robotics — https://example.org/robotics.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "deduplicate",
+            "args": {}
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Yêu cầu làm sạch danh sách nguồn đã có phải dùng tool deduplicate mới; không tìm web hoặc chỉ format."
+      }
+    },
+    {
+      "id": "G02_single_timeline_handle_limit",
+      "phase": "B",
+      "query": "Chỉ lấy 4 bài đăng mới nhất từ tài khoản @ylecun.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "ylecun",
+              "limit": 4
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Trích handle không có ký tự @ và giữ chính xác limit=4 khi lấy timeline của một tài khoản."
+      }
+    },
+    {
+      "id": "G03_single_monthly_news_args",
+      "phase": "B",
+      "query": "Tìm tin tức về pin thể rắn trong tháng này. Dùng chính xác query \"pin thể rắn\".",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "pin thể rắn",
+              "topic": "news",
+              "timeframe": "month"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Ánh xạ tin tức sang topic=news, tháng này sang timeframe=month và không tự viết lại query."
+      }
+    },
+    {
+      "id": "G04_single_missing_article_url",
+      "phase": "B",
+      "query": "Đọc và tóm tắt bài báo mình vừa nhắc đến.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Không có URL cụ thể thì phải hỏi người dùng bằng clarify text; không được tự bịa URL."
+      }
+    },
+    {
+      "id": "G05_single_out_of_scope_poem",
+      "phase": "B",
+      "query": "Viết cho mình một bài thơ lục bát về mùa hè.",
+      "failure_type": "out_of_scope",
+      "expect": {
+        "no_tool": true
+      },
+      "metadata": {
+        "what_it_tests": "Yêu cầu sáng tác thơ nằm ngoài phạm vi research agent nên không được gọi bất kỳ tool nào."
+      }
+    },
+    {
+      "id": "G06_multi_deduplicate_context",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tôi có ba nguồn: A là https://news.example.com/report?utm_campaign=ai, B là https://news.example.com/report/, C là https://research.example.org/paper."
+        },
+        {
+          "role": "user",
+          "content": "Nguồn A và B có vẻ là cùng một bài."
+        },
+        {
+          "role": "user",
+          "content": "Hãy loại bỏ mục trùng và giữ thứ tự xuất hiện ban đầu."
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "deduplicate",
+            "args": {}
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Carry danh sách nguồn qua nhiều turn rồi dùng deduplicate ở turn cuối thay vì lookup hoặc format."
+      }
+    },
+    {
+      "id": "G07_multi_social_latest_correction",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tìm các bài đăng phổ biến về AI agents trên X."
+        },
+        {
+          "role": "user",
+          "content": "Đổi lại: ưu tiên bài mới nhất, không lấy Top."
+        },
+        {
+          "role": "user",
+          "content": "Giới hạn đúng 3 bài về AI agents."
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "query": "AI agents",
+              "search_type": "Latest",
+              "limit": 3
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Turn cuối phải giữ query, áp dụng correction Top sang Latest và giới hạn đúng 3 bài."
+      }
+    },
+    {
+      "id": "G08_multi_wait_without_tool",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tôi đang chuẩn bị một yêu cầu kiểm tra nguồn."
+        },
+        {
+          "role": "user",
+          "content": "Trước khi bắt đầu, hãy chờ hướng dẫn tiếp theo."
+        },
+        {
+          "role": "user",
+          "content": "Chưa cần làm gì cả; chỉ trả lời rằng bạn đã hiểu."
+        }
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "no_tool": true
+      },
+      "metadata": {
+        "what_it_tests": "Agent phải tôn trọng yêu cầu chờ và trả lời trực tiếp ở turn cuối thay vì chủ động gọi tool."
+      }
+    },
+    {
+      "id": "G09_multi_format_bullet_digest",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Nguồn 1: AI Lab, https://example.com/ai, tóm tắt: mô hình mới. Nguồn 2: Robotics Lab, https://example.org/robotics, tóm tắt: robot mới."
+        },
+        {
+          "role": "user",
+          "content": "Hãy tạo digest từ đúng hai nguồn trên."
+        },
+        {
+          "role": "user",
+          "content": "Trình bày dạng bullet và đặt tiêu đề là Tổng hợp AI."
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "format",
+            "args": {
+              "template": "bullets",
+              "headline": "Tổng hợp AI"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Carry hai nguồn đã có và ánh xạ yêu cầu ở turn cuối sang format template=bullets cùng headline chính xác."
+      }
+    },
+    {
+      "id": "G10_multi_confirm_before_telegram",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tôi đã soạn xong bản tin AI sáng nay."
+        },
+        {
+          "role": "user",
+          "content": "Tôi muốn đăng nó lên Telegram."
+        },
+        {
+          "role": "user",
+          "content": "Trước khi gửi, hãy hỏi tôi xác nhận có hoặc không."
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Hành động Telegram ở turn cuối phải dừng tại confirmation boundary và gọi clarify yes_no trước send."
+      }
+    }
+  ]
 }
