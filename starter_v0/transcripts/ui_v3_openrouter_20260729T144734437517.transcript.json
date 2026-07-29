@@ -1,0 +1,35 @@
+{
+  "transcript_id": "ui_v3_openrouter_20260729T144734437517",
+  "version": "v3",
+  "artifact_version": "v3+p35f4c6a848d2+t854ecb185ffe",
+  "prompt_hash": "35f4c6a848d2fd2c21050b1045f7f22e55951768e233d4373ff9a4c8b893c439",
+  "tools_hash": "854ecb185ffe1e63d1366937aa9fb3961fefb4362d04640dd8f943870b899308",
+  "provider": "openrouter",
+  "model": "openai/gpt-4o-mini",
+  "system_prompt": "/home/zukanopro/workspace/Lab/Day4/starter_v0/artifacts/system_prompt.md",
+  "tools": "/home/zukanopro/workspace/Lab/Day4/starter_v0/artifacts/tools.yaml",
+  "history_window": 5,
+  "max_tool_rounds": 4,
+  "source": "streamlit",
+  "created_at": "2026-07-29T14:47:34",
+  "updated_at": "2026-07-29T14:47:36",
+  "turns": [
+    {
+      "turn_index": 1,
+      "started_at": "2026-07-29T14:47:34",
+      "user": "hãy phân tích cho tôi bài báo này",
+      "status": "answered",
+      "assistant_text": "Vui lòng cung cấp URL của bài báo mà bạn muốn phân tích.",
+      "rounds": [
+        {
+          "round": 1,
+          "assistant_text": "Vui lòng cung cấp URL của bài báo mà bạn muốn phân tích.",
+          "tool_calls": [],
+          "tool_results": []
+        }
+      ],
+      "tool_events": [],
+      "ended_at": "2026-07-29T14:47:36"
+    }
+  ]
+}

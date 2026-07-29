@@ -51,7 +51,7 @@ st.set_page_config(
     page_title="Research Agent Console",
     page_icon="⌁",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 load_lab_env(ROOT)
@@ -89,19 +89,18 @@ def inject_styles() -> None:
           color: var(--rac-ink);
         }
 
+        /* This is a projector-first surface: no Streamlit chrome or sidebar. */
+        [data-testid="stHeader"],
+        [data-testid="stSidebar"],
+        [data-testid="stSidebarCollapsedControl"] {
+          display: none !important;
+        }
+
+        [data-testid="stMainBlockContainer"],
         [data-testid="stAppViewContainer"] > .main .block-container {
           max-width: 1560px;
-          padding-top: 1.4rem;
-          padding-bottom: 2rem;
-        }
-
-        [data-testid="stSidebar"] {
-          background: var(--rac-surface);
-          border-right: 1px solid var(--rac-border);
-        }
-
-        [data-testid="stSidebar"] hr {
-          border-color: var(--rac-border);
+          padding-top: 0.7rem !important;
+          padding-bottom: 7.5rem !important;
         }
 
         .rac-header {
@@ -200,11 +199,55 @@ def inject_styles() -> None:
         .rac-state--waiting::before { background: var(--rac-warning); }
         .rac-state--error::before { background: var(--rac-error); }
 
+        .rac-ev-col-head {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 0.6rem;
+          padding-bottom: 0.45rem;
+          border-bottom: 1px solid var(--rac-border);
+          font-weight: 700;
+          font-size: 0.95rem;
+        }
+        .rac-ev-pass-chip {
+          display: inline-block;
+          padding: 0.12rem 0.5rem;
+          border-radius: 999px;
+          font-size: 0.75rem;
+          font-weight: 700;
+          background: oklch(0.92 0.07 145);
+          color: oklch(0.32 0.1 145);
+        }
+        .rac-ev-fail-chip {
+          display: inline-block;
+          padding: 0.12rem 0.5rem;
+          border-radius: 999px;
+          font-size: 0.75rem;
+          font-weight: 700;
+          background: oklch(0.93 0.07 25);
+          color: oklch(0.38 0.14 25);
+        }
         [data-testid="stChatMessage"] {
           background: transparent;
           border-bottom: 1px solid var(--rac-border);
           border-radius: 0;
           padding-block: 0.8rem;
+        }
+
+        [data-testid="stChatMessage"]:has(.rac-message-role--user) {
+          flex-direction: row-reverse;
+        }
+
+        [data-testid="stChatMessage"]:has(.rac-message-role--user) [data-testid="stChatMessageContent"] {
+          margin-left: auto;
+          max-width: min(78%, 66ch);
+          padding: 0.15rem 0.85rem;
+          border-radius: var(--rac-radius-sm);
+          background: var(--rac-surface);
+        }
+
+        .rac-message-role {
+          display: none;
         }
 
         [data-testid="stChatMessage"]:last-child {
@@ -220,6 +263,11 @@ def inject_styles() -> None:
         [data-testid="stCode"] code {
           font-size: 0.84rem;
           line-height: 1.5;
+        }
+
+        [data-testid="stCode"] {
+          max-height: 17rem;
+          overflow: auto;
         }
 
         .stButton > button,
@@ -249,8 +297,18 @@ def inject_styles() -> None:
         }
 
         [data-testid="stChatInput"] {
+          position: fixed !important;
+          z-index: 20;
+          left: 5rem;
+          right: 5rem;
+          bottom: 1.1rem;
+          width: auto !important;
           border-color: var(--rac-border);
           border-radius: var(--rac-radius-md);
+        }
+
+        [data-testid="stChatInput"] textarea {
+          font-size: 1rem;
         }
 
         .rac-evidence-pass {
@@ -270,8 +328,10 @@ def inject_styles() -> None:
         }
 
         @media (max-width: 760px) {
+          [data-testid="stMainBlockContainer"],
           [data-testid="stAppViewContainer"] > .main .block-container {
             padding-inline: 1rem;
+            padding-bottom: 6.8rem;
           }
 
           .rac-header {
@@ -289,6 +349,16 @@ def inject_styles() -> None:
           [data-testid="column"] {
             width: 100% !important;
             flex: 1 1 auto !important;
+          }
+
+          [data-testid="stChatMessage"]:has(.rac-message-role--user) [data-testid="stChatMessageContent"] {
+            max-width: 88%;
+          }
+
+          [data-testid="stChatInput"] {
+            left: 1rem;
+            right: 1rem;
+            bottom: 0.8rem;
           }
         }
 
@@ -356,61 +426,6 @@ def render_header(*, artifact_version: str, model: str, ready: bool) -> None:
     )
 
 
-def render_sidebar(
-    *,
-    version: str,
-    artifact_version: str,
-    model: str,
-    availability: dict[str, bool],
-) -> None:
-    with st.sidebar:
-        st.subheader("Runtime")
-        st.text_input("Provider", PROVIDER_NAME, disabled=True)
-        st.text_input("Model", model, disabled=True)
-        st.text_input("Live artifact", version, disabled=True)
-        st.caption(artifact_version)
-
-        st.divider()
-        st.subheader("API readiness")
-        readiness = {
-            "OpenRouter": availability.get("OPENROUTER_API_KEY", False),
-            "Tavily · lookup": availability.get("TAVILY_API_KEY", False),
-            "Firecrawl · fetch": availability.get("FIRECRAWL_API_KEY", False),
-            "RapidAPI · social": availability.get("RAPIDAPI_KEY", False),
-        }
-        for label, ready in readiness.items():
-            st.write(f"{'●' if ready else '○'} {label} — {'ready' if ready else 'missing'}")
-
-        telegram_ready = availability.get("TELEGRAM_BOT_TOKEN", False) and availability.get(
-            "TELEGRAM_CHAT_ID", False
-        )
-        if telegram_ready:
-            st.warning("Telegram live-send credentials are set. Keep demo requests at the confirmation boundary.")
-        else:
-            st.caption("Telegram live send disabled — safe demo mode.")
-
-        st.divider()
-        st.subheader("Conversation")
-        st.write(f"History window: **{HISTORY_WINDOW}** pairs")
-        st.write(f"Max tool rounds: **{MAX_TOOL_ROUNDS}**")
-        if st.button("Start a new session", width="stretch"):
-            reset_session()
-            st.rerun()
-
-        transcript = st.session_state.get("transcript")
-        transcript_path = st.session_state.get("transcript_path")
-        if transcript and transcript_path:
-            st.caption("Transcript")
-            st.code(transcript.get("transcript_id", ""), language=None)
-            st.download_button(
-                "Download transcript",
-                data=json.dumps(sanitize_payload(transcript), ensure_ascii=False, indent=2),
-                file_name=Path(transcript_path).name,
-                mime="application/json",
-                width="stretch",
-            )
-
-
 def render_chat_history() -> None:
     if not st.session_state.history:
         st.markdown(
@@ -424,7 +439,12 @@ def render_chat_history() -> None:
         )
         return
     for message in st.session_state.history:
-        with st.chat_message(message["role"]):
+        role = str(message["role"])
+        with st.chat_message(role):
+            st.markdown(
+                f'<span class="rac-message-role rac-message-role--{html.escape(role)}"></span>',
+                unsafe_allow_html=True,
+            )
             st.markdown(message["content"])
 
 
@@ -443,8 +463,8 @@ def render_tool_event(event: dict[str, Any]) -> None:
     state = tool_result_label(event)
     state_label = {"success": "success", "waiting": "waiting", "error": "error"}[state]
     st.markdown(f"**{tool_name}** · {state_label}")
-    st.caption("Arguments")
-    st.code(json_text(event.get("args") or {}), language="json")
+    with st.expander("Arguments", expanded=False):
+        st.code(json_text(event.get("args") or {}, max_chars=1800), language="json")
 
     result = event.get("result")
     if isinstance(result, dict):
@@ -461,8 +481,8 @@ def render_tool_event(event: dict[str, Any]) -> None:
             summary_bits.append(f"error={result['error']}")
         if summary_bits:
             st.caption(" · ".join(summary_bits))
-    st.caption("Result")
-    st.code(json_text(result), language="json")
+    with st.expander("Raw result JSON", expanded=False):
+        st.code(json_text(result, max_chars=2800), language="json")
 
 
 def render_trace(turn: dict[str, Any] | None) -> None:
@@ -626,14 +646,32 @@ def render_live_tab(
     openai_tools: list[dict[str, Any]],
     artifact: dict[str, str],
 ) -> None:
+    session_column, transcript_column, _ = st.columns([1.5, 2, 4.5], gap="small")
+    with session_column:
+        if st.button("New session", key="new_live_session"):
+            reset_session()
+            st.rerun()
+    with transcript_column:
+        transcript = st.session_state.get("transcript")
+        transcript_path = st.session_state.get("transcript_path")
+        if transcript and transcript_path:
+            st.download_button(
+                "Download transcript",
+                data=json.dumps(sanitize_payload(transcript), ensure_ascii=False, indent=2),
+                file_name=Path(transcript_path).name,
+                mime="application/json",
+                key="download_live_transcript",
+            )
+
     chat_column, trace_column = st.columns([3, 2], gap="large")
     selected_prompt: str | None = None
+    typed_prompt: str | None = None
 
     with chat_column:
         st.subheader("Conversation")
-        conversation_height = 120 if not st.session_state.history else 235
-        conversation = st.container(height=conversation_height)
-        with conversation:
+        # No fixed height — container grows with content so users don't need
+        # to constantly scroll inside a tiny clipped box.
+        with st.container():
             render_chat_history()
 
         if not st.session_state.history:
@@ -643,12 +681,6 @@ def render_live_tab(
                 with prompt_columns[index]:
                     if st.button(example, key=f"demo_prompt_{index}", width="stretch"):
                         selected_prompt = example
-
-        if provider_ready:
-            typed_prompt = st.chat_input("Ask for research, provide a URL, or test a safety boundary…")
-        else:
-            typed_prompt = None
-            st.error("Configure OPENROUTER_API_KEY in .env before using live chat.")
 
     with trace_column:
         selected_turn: dict[str, Any] | None = None
@@ -665,9 +697,14 @@ def render_live_tab(
                 key=f"trace_turn_select_{len(turn_options)}",
             )
             selected_turn = st.session_state.turns[selected_index]
-        trace_panel = st.container(height=195)
-        with trace_panel:
+        # Also no fixed height on trace so it doesn't clip long tool results
+        with st.container():
             render_trace(selected_turn)
+
+    if provider_ready:
+        typed_prompt = st.chat_input("Ask for research, provide a URL, or test a safety boundary…")
+    else:
+        st.error("Configure OPENROUTER_API_KEY in .env before using live chat.")
 
     prompt = selected_prompt or typed_prompt
     if prompt:
@@ -680,6 +717,36 @@ def render_live_tab(
             artifact=artifact,
         )
         st.rerun()
+
+
+def _render_evidence_col(row: dict[str, Any]) -> None:
+    """Render a uniform, progressively disclosed version comparison column."""
+    passed = row["passed"]
+    chip_cls = "rac-ev-pass-chip" if passed else "rac-ev-fail-chip"
+    chip_label = "PASS" if passed else "FAIL"
+    short_artifact = str(row["artifact_version"])[:30]
+    st.markdown(
+        f'<div class="rac-ev-col-head">'
+        f'{html.escape(row["version"])} '
+        f'<span class="{chip_cls}">{chip_label}</span>'
+        f'</div>'
+        f'<div style="font-size:0.78rem;color:var(--rac-muted);margin-bottom:0.5rem">'
+        f'{html.escape(short_artifact)}'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+    call_count = len(row["actual_tool_calls"])
+    failure_count = len(row["failures"])
+    st.caption(f"{call_count} actual call(s) · {failure_count} mismatch(es)")
+    with st.expander("Expected", expanded=False):
+        st.code(json_text(row["expected"], max_chars=1800), language="json")
+    with st.expander("Actual calls", expanded=False):
+        st.code(json_text(row["actual_tool_calls"], max_chars=1800), language="json")
+    with st.expander("Failures", expanded=False):
+        if row["failures"]:
+            st.code(json_text(row["failures"], max_chars=1800), language="json")
+        else:
+            st.caption("No grader mismatches.")
 
 
 def render_evidence_tab() -> None:
@@ -700,7 +767,10 @@ def render_evidence_tab() -> None:
     case_id = st.selectbox("Compare one fixed base case", case_ids, index=default_index)
     rows = evidence_case_rows(runs, case_id)
 
-    if rows and rows[0].get("input") is not None:
+    if not rows:
+        return
+
+    if rows[0].get("input") is not None:
         st.caption("Scenario")
         input_value = rows[0]["input"]
         if isinstance(input_value, str):
@@ -708,30 +778,32 @@ def render_evidence_tab() -> None:
         else:
             st.json(input_value, expanded=False)
 
-    for row in rows:
-        pass_class = "rac-evidence-pass" if row["passed"] else "rac-evidence-fail"
-        pass_label = "PASS" if row["passed"] else "FAIL"
-        with st.expander(
-            f"{row['version']} · {pass_label} · {row['artifact_version']}",
-            expanded=not row["passed"],
-        ):
-            st.markdown(
-                f'<span class="{pass_class}">{pass_label}</span>',
-                unsafe_allow_html=True,
+    version_labels = [str(row["version"]) for row in rows]
+    view_mode = st.radio(
+        "Evidence layout",
+        ["All versions", "Compare two versions"],
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+    row_map = {str(row["version"]): row for row in rows}
+
+    if view_mode == "Compare two versions":
+        pick_cols = st.columns(2, gap="small")
+        with pick_cols[0]:
+            left_choice = st.selectbox("Left version", version_labels, index=0, key="ev_left")
+        with pick_cols[1]:
+            right_choice = st.selectbox(
+                "Right version", version_labels, index=min(1, len(version_labels) - 1), key="ev_right"
             )
-            st.caption("Expected behavior")
-            st.code(json_text(row["expected"]), language="json")
-            st.caption("Actual tool calls")
-            st.code(json_text(row["actual_tool_calls"]), language="json")
-            if row["failures"]:
-                st.caption("Failures")
-                st.code(json_text(row["failures"]), language="json")
-            else:
-                st.caption("No grader mismatches.")
-            st.markdown(
-                f'<div class="rac-mono">{html.escape(str(row["run_file"]))}</div>',
-                unsafe_allow_html=True,
-            )
+        display_rows = [row_map[left_choice], row_map[right_choice]]
+    else:
+        display_rows = rows
+
+    cols = st.columns(len(display_rows), gap="medium")
+    for col, row in zip(cols, display_rows):
+        with col:
+            with st.container(border=True):
+                _render_evidence_col(row)
 
 
 inject_styles()
@@ -748,12 +820,6 @@ model = str(getattr(provider, "default_model", "openai/gpt-4o-mini"))
 availability = secret_availability()
 provider_ready = availability.get("OPENROUTER_API_KEY", False)
 
-render_sidebar(
-    version=current_version,
-    artifact_version=artifact["artifact_version"],
-    model=model,
-    availability=availability,
-)
 render_header(
     artifact_version=artifact["artifact_version"],
     model=model,
